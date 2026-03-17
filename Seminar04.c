@@ -75,8 +75,14 @@ void adaugaMasinaInLista(Nod** first, Masina masinaNoua) {
 	}
 }
 
-void adaugaLaInceputInLista(/*lista de masini*/ Masina masinaNoua) {
-	//adauga la inceputul listei o noua masina pe care o primim ca parametru
+void adaugaLaInceputInLista(Nod** first, Masina masinaNoua) {
+
+	Nod* nou = (Nod*)malloc(sizeof(Nod));
+	nou->next = *first;
+	nou->info = masinaNoua;
+	*first = nou;
+
+
 }
 
 void* citireListaMasiniDinFisier(const char* numeFisier) {
@@ -104,25 +110,88 @@ void dezalocareListaMasini(Nod** first) {
 
 }
 
-float calculeazaPretMediu(/*lista de masini*/) {
-	//calculeaza pretul mediu al masinilor din lista.
+float calculeazaPretMediu(Nod* first) {
+
+	int nrMasini = 0;
+	float pretTotal = 0.0;
+	if (first) {
+		while (first)
+		{
+			nrMasini++;
+			pretTotal += first->info.pret;
+			first = first->next;
+
+		}
+		return pretTotal / nrMasini;
+	}
 	return 0;
+
 }
 
-void stergeMasiniDinSeria(/*lista masini*/ char serieCautata) {
+void stergeMasiniDinSeria(Nod** first, char serieCautata) {
 	//sterge toate masinile din lista care au seria primita ca parametru.
 	//tratati situatia ca masina se afla si pe prima pozitie, si pe ultima pozitie
+
+
+	while ((*first) && (*first)->info.serie == serieCautata)
+	{
+		Nod* temp = (*first);
+		(*first) = (*first)->next;
+
+		free(temp);
+	}
+
+	if (*first == NULL) {
+		return;
+	}
+
+	Nod* aux = (*first);
+	Nod* temp = (*first)->next;
+
+	while (temp)
+	{
+		if (temp->info.serie == serieCautata)
+		{
+			aux->next = temp->next;
+
+			free(temp);
+
+			temp = aux->next;
+		}
+		else
+		{
+			aux = temp;
+			temp = temp->next;
+		}
+	}
+
 }
 
-float calculeazaPretulMasinilorUnuiSofer(/*lista masini*/ const char* numeSofer) {
+float calculeazaPretulMasinilorUnuiSofer(Nod* first, const char* numeSofer) {
 	//calculeaza pretul tuturor masinilor unui sofer.
-	return 0;
+
+	float pretTotalMasini = 0;
+
+	while ((first)) {
+
+		if (strcmp(numeSofer, first->info.numeSofer) == 0)
+		{
+			pretTotalMasini += first->info.pret;
+		}
+		first = first->next;
+
+	}
+	return pretTotalMasini;
 }
 
 int main() {
 	Nod* first = citireListaMasiniDinFisier("masini.txt");
+	Masina masina = { 11, 2, 50000, "Audi", "Matei",'A' };
+	adaugaLaInceputInLista(&first, masina);
+	printf("%f", calculeazaPretMediu(first));
+	stergeMasiniDinSeria(&first, 'A');
 	afisareListaMasini(first);
-	dezalocareListaMasini(&first);
-	afisareListaMasini(first);
+	printf("%f", calculeazaPretulMasinilorUnuiSofer(first, "Gigel"));
+
 	return 0;
 }
